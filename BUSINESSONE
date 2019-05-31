@@ -1,0 +1,1249 @@
+#include<iostream.h>
+#include<conio.h>
+#include<graphics.h>
+#include<process.h>
+#include<stdio.h>
+#include<dos.h>
+#include<time.h>
+#include<fstream.h>
+#include<string.h>
+#include<stdlib.h>
+
+class Snake
+{
+ int p1,p2,v1,v2,v3,e1,e2,prev,now,n,colr,dsp,cnt,dly,m;
+ int stp,egGen;
+ int xr,yr;
+ void caught();
+ public:
+  long scr;
+ int strtX,strtY,endX,endY;
+ int pos[100][2];
+ void show();
+ void init();
+ void egg();
+ void transpose();
+ void gnrtCond();
+ void gnrtUnCond();
+ void check();
+ void checkEgg();
+ void move();
+ void chngDir();
+ void sndEt();
+ void sndCgt();
+ int test();
+ void score();
+ Snake();
+ Snake(Snake*);
+ ~Snake();
+ };
+Snake::Snake()
+ {
+ }
+Snake::~Snake()
+{
+
+}
+void Snake::checkEgg()
+{
+ if((e1 == p1) && (e2 == p2))
+ {sndEt();
+  egg();
+  dly--;
+  score();
+  n++;
+  }
+}
+void Snake::sndEt()
+{nosound();
+ sound(2500);
+ delay(2);
+ nosound();
+}
+void Snake::sndCgt()
+{nosound();
+ for(int x=1000;x>0;x--)
+ {sound(x);
+  delay(1);
+  }
+ nosound();
+}
+void Snake::score()
+{ char *p;
+
+  ltoa(scr,p,10);
+  settextstyle(8,0,1);
+  setcolor(0);
+  outtextxy(585,40,p);
+  if(egGen != 1){
+  scr = scr + dly / 10;
+  }
+  ltoa(scr,p,10);
+  setcolor(10);
+  outtextxy(585,40,p);
+
+}
+void Snake::gnrtCond()
+{if(n < 367)
+ {if(now == 8 && (prev != 8 && prev != 2))
+  {pos[0][0] = p1;
+   pos[0][1] = p2 - dsp;
+   prev = now;
+   }
+  if(now == 4 && (prev != 4 && prev != 1))
+  {pos[0][0] = p1 + dsp;
+   pos[0][1] = p2;
+   prev = now;
+   }
+  if(now == 2 && (prev != 8 && prev != 2))
+  {pos[0][0] = p1;
+   pos[0][1] = p2 + dsp;
+   prev = now;
+   }
+  if(now == 1 && (prev != 1 && prev != 4))
+  {pos[0][0] = p1 - dsp;
+   pos[0][1] = p2;
+   prev = now;
+   }
+}
+}
+void Snake::gnrtUnCond()
+{
+  if( prev == 8 )
+  {pos[0][0] = p1;
+   pos[0][1] = p2 - dsp;
+   }
+ if( prev == 4 )
+  {pos[0][0] = p1 + dsp;
+   pos[0][1] = p2;
+   }
+ if( prev == 2 )
+  {pos[0][0] = p1;
+   pos[0][1] = p2 + dsp;
+   }
+ if( prev == 1 )
+  {pos[0][0] = p1 - dsp;
+   pos[0][1] = p2;
+   }
+ p1 = pos[0][0];
+ p2 = pos[0][1];
+}
+void Snake::check()
+{
+ if(p1 > endX)
+  {p1 = strtX;}
+ else if(p1 < strtX)
+  {p1 = endX;}
+
+ if(p2 > endY)
+  {p2 = strtY;}
+ else if(p2 < strtY)
+  {p2 = endY;}
+
+ pos[0][0] = p1;
+ pos[0][1] = p2;
+for(int i = 1;i < n;i++)
+  { if(p1 == pos[i][0] && p2 == pos[i][1])
+  {caught();
+   break;
+  }
+ }
+}
+void Snake::show()
+{
+  int x = getcolor();
+  if(egGen != 1)
+  {
+  setcolor(getbkcolor());
+  setfillstyle(1,getbkcolor());
+  fillellipse(v1,v2,yr,yr);
+   }
+  else
+   egGen = 0;
+  if(egGen == 2)
+   egGen--;
+  setcolor(colr);
+  setfillstyle(1,9);
+  if(now == 8 || now == 2)
+   fillellipse(pos[0][0],pos[0][1],xr,yr);
+  else if(now == 4 || now == 1)
+   fillellipse(pos[0][0],pos[0][1],yr,xr);
+  setcolor(x);
+}
+void Snake::transpose()
+{ int i,j,x,y;
+   p1 = pos[0][0];
+   p2 = pos[0][1];
+   if(!egGen){
+   v1 = pos[n-1][0];
+   v2 = pos[n-1][1];
+   }
+   else
+    egGen = 0;
+   for(i = n-1;i >= 1;i--)
+   {pos[i][0] = pos[i-1][0];
+    pos[i][1] = pos[i-1][1];
+   }
+}
+void Snake::move()
+{ int st = 0;
+  do{
+   if(!kbhit())
+   {checkEgg();
+    if(!st)
+     show();
+    else
+     st = 0;
+    delay(dly/4);
+    transpose();
+    delay(dly/4);
+    gnrtUnCond();
+    delay(dly/4);
+    check();
+   delay(dly/4);
+    }
+   else if(stp){
+   chngDir();
+   gnrtCond();
+   check();
+   show();
+   st = 1;
+   }
+   }while(stp);
+}
+void Snake::init()
+{time_t tm;
+ srand(time(&tm));
+ dsp = 20;
+ n = 5;
+ prev = 4;
+ for(int i = 4;i >= 0;i--)
+ {pos[i][0] = 201 + (n - i - 1) * dsp;
+  pos[i][1] = 301;
+  }
+  strtX = 21;
+  strtY = 21;
+  endX = 481;
+  endY = 361;
+  colr = 14;
+  now = prev;
+  dsp = 20;
+  stp = 111;
+  cnt = -1;
+  scr = 0;
+  dly = 150;
+   xr = 3;
+   yr = 9;
+  egg();
+  egGen = 1;
+  score();
+  int x = getcolor();
+  setlinestyle(0,1,3);
+  setcolor(15);
+  rectangle(strtX-15,strtY-15,endX+15,endY+15);
+  rectangle(endX+25,strtY-15,getmaxx()-15,endY+15);
+  rectangle(strtX-15,endY+25,getmaxx()-15,getmaxy()-5);
+  line(endX+25,strtY+75,getmaxx()-15,strtY+75);
+  line(endX+25,strtY+200,getmaxx()-15,strtY+200);
+  line(endX+25,strtY+275,getmaxx()-15,strtY+275);
+  setlinestyle(0,1,1);
+  settextstyle(8,0,1);
+  setcolor(11);
+  outtextxy(514,40,"SCORE");
+  setcolor(14);
+  settextstyle(11,0,5);
+  outtextxy(524,110," CONTROLS ");
+  outtextxy(522,135,"p = PAUSE");
+  outtextxy(522,155,"g = RESUME");
+  outtextxy(522,175,"e = EXIT");
+  outtextxy(513,195,"ARROWS");
+  outtextxy(512,205,"    -MOVEMENT");
+  setcolor(14);
+  settextstyle(4,0,9);
+  outtextxy(getmaxx()-500,getmaxy()-110,"SNAKE");
+  settextstyle(8,0,1);
+  setcolor(x);
+}
+void Snake::caught()
+{
+ stp = 0;
+ sndCgt();
+for(int i=0;i<=7;i++)
+ {if(i%2)
+  {setcolor(10);
+   outtextxy(512,250,"GAME OVER");
+   delay(900);
+   }
+  else
+  {setcolor(0);
+   outtextxy(512,250,"GAME OVER");
+   delay(500);
+  }
+  }
+ sleep(1);
+
+}
+void Snake::chngDir()
+{int clr;
+ fillsettingstype *p;
+ char x = getch();
+ if(x == 72)
+  now = 8;
+ else if(x == 77)
+  now = 4;
+ else if(x == 80)
+  now = 2;
+ else if(x == 75)
+  now = 1;
+ else if(x == 'e')
+  caught();
+ else if(x == 'p')
+ {//int y = getcolor();
+  int twnkl = 1;
+  settextstyle(11,0,9);
+  while(1)
+  {if(kbhit())
+   {int c = getch();
+    if(c == 'g')
+    {clr = getcolor();
+     setcolor(0);
+     rectangle(endX+40,endY-10,getmaxx()-35,getmaxy()-160);
+     outtextxy(endX+60,endY-29,"PAUSE");
+     break;
+     }
+    }
+   else
+   {if(twnkl%2)
+    {clr = getcolor();
+     setcolor(10);
+     rectangle(endX+40,endY-10,getmaxx()-35,getmaxy()-160);
+     outtextxy(endX+60,endY-29,"PAUSE");
+     setcolor(clr);
+      delay(1000);
+     }
+    else
+    {
+     clr = getcolor();
+     setcolor(0);
+     rectangle(endX+40,endY-10,getmaxx()-35,getmaxy()-160);
+     outtextxy(endX+60,endY-29,"PAUSE");
+     delay(1000);
+    }
+   }
+   twnkl++;
+  }
+    settextstyle(8,0,1);
+ }
+}
+Snake::Snake(Snake *p)
+{
+ *p=NULL;
+}
+void Snake::egg()
+{ do
+  {e1 = (rand() % 100) * dsp + strtX;
+   e2 = (rand() % 100) * dsp + strtY;
+   }while(test());
+  int x = getcolor();
+  setcolor(7);
+  setfillstyle(1,random(15)+1);
+  fillellipse(e1,e2,xr+2,xr+2);
+  setcolor(x);
+  egGen = 2;
+}
+int Snake::test()
+{ for(int i=0;i<n;i++)
+  {if(e1 == pos[i][0] && e2 == pos[i][1])
+    break;
+   if(v1 == e1 && v2 == e2)
+    break;
+   if((e1 >= endX+1) || (e2 >= endY+1))
+    break;
+   }
+ if(i != n)
+  return 1;
+ else
+  return 0;
+}
+
+int a=0;
+
+void main()
+{
+void database(char);
+phase1 :
+clrscr();
+int gd =DETECT,gm,sri=0;
+char choice3=0,choice1=0,choice2=0;
+initgraph (&gd, &gm, "C:\\turboC3\\bgi");
+settextstyle(GOTHIC_FONT,HORIZ_DIR,5);
+bar3d(150,90,400,185,20,5);
+setfillstyle(10,WHITE);
+floodfill(170,80,WHITE);
+setfillstyle(10,WHITE);
+floodfill(410,150,WHITE);
+setcolor(BLACK);
+outtextxy(160,90,"BUSINESS");
+outtextxy(230,140,"ONE");
+setcolor(YELLOW);
+settextstyle(1,HORIZ_DIR,1);
+outtextxy(55,200,"(HANA and Corporations. Copyright & Registered 2017)");
+//doller signs
+line(0,350,800,350); //road
+arc(52,292,0,250,20);
+arc(50,330,180,459,20);
+line(50,265,50,350);
+line(59,265,59,350);
+//rupee sign
+arc(300,280,250,130,20);
+line(295,300,320,350);
+line(300,300,327,350);
+line(280,285,330,285);
+line(280,280,330,280);
+//dollar sign
+arc(600,292,0,250,20);
+arc(600,330,180,459,20);
+line(595,265,595,350);
+line(609,265,609,350);
+settextstyle(1,HORIZ_DIR,3);
+outtextxy(250,400,"PRESS ENTER");
+
+//watch
+time_t rawTime;
+struct tm* currentTime;
+char a[100];
+
+rawTime = time(NULL);
+currentTime= localtime(&rawTime);
+strftime(a,100,"%I:%M:%S",currentTime);
+
+setcolor(11);
+settextstyle(3,HORIZ_DIR,2);
+outtextxy(480,1,a);
+
+getch();
+closegraph();
+cout<<"\n \n \n \n \n \n \n \n \n "<<endl;
+textcolor(2);
+cprintf("                      TO START PRESS Y  OR  N TO EXIT     ");
+cout<<"\n "<<endl;
+textcolor(-4);
+cprintf("                            ENTER YOUR CHOICE :");
+cin>>choice1;
+if(choice1=='Y'||choice1=='y'){goto phase2;}
+else{  clrscr();
+choice: cout<<"\n \n \n \n \n \n \n"<<endl;
+       textcolor(2);
+       cprintf("                       ARE YOU SURE YOU WANT TO EXIT");
+       cout<<" "<<endl;
+       cprintf("                 PRESS Y TO EXIT OR N TO GO TO MAIN MENU");
+       cout<<"\n "<<endl;
+       textcolor(-4);
+       cprintf("                            ENTER YOUR CHOICE :");
+       cin>>choice2;
+       if(choice2=='Y'||choice2=='y') {exit(0);}
+       else if(choice2=='N'||choice2=='n')
+	  {goto phase1;
+
+	    }
+       else{cout<<"\n"<< endl;
+       textcolor(-4);
+       clrscr();
+       cprintf("                              INVALID ENTRY");
+       goto choice;
+      }
+      }
+
+// second menu
+phase2 :
+clrscr();
+
+    for(int j=5;j<9;j++){
+      cout<<"\n \n \n \n \n \n \n \n"<<endl;
+      textcolor(YELLOW+j);
+      cprintf("                                  L");delay(200);
+      cprintf("O");delay(200);
+      cprintf("A");delay(200);
+      cprintf("D");delay(200);
+      cprintf("I");delay(200);
+      cprintf("N");delay(200);
+      cprintf("G");delay(200);
+      clrscr();
+
+       }
+choice5:
+initgraph (&gd, &gm, "C:\\turboC3\\bgi");
+settextstyle(GOTHIC_FONT,HORIZ_DIR,4);
+setcolor(YELLOW);
+outtextxy(50,1,"BUSINESS ONE");
+settextstyle(2,HORIZ_DIR,10);
+setcolor(GREEN);
+line(1,45,500,45);
+outtextxy(50,60,"HOME SCREEN");
+line(1,100,500,100);
+bar3d(10,200,500,425,20,1);
+settextstyle(7,HORIZ_DIR,3);
+setcolor(BLACK);
+outtextxy(15,220,"1.  CREATE NEW COMPANY");
+outtextxy(15,270,"2.  SEARCH YOUR COMPANY");
+outtextxy(15,320,"3.  HELP");
+outtextxy(15,370,"4.  QUIT");
+textcolor(1);
+cout<<"\n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n "<<endl;
+cout<<" \t  \t \t \t \t \t Choice:- ";
+cin>>choice3;
+getch();
+closegraph();
+int ch1=0,ch2=choice3-48;
+switch(ch2)
+{
+  case 1:  {ch1=1;
+	   break;}
+  case 2:  {ch1=2;
+	   break;}
+  case 3: {ch1=3;
+	   break;}
+  case 4:  {exit(0);}
+  default: {goto choice5;
+	    break
+	    ;}
+
+ }
+if(ch1==1){
+level1:
+textcolor(6);
+cout<<" \n \n \n \n \n \n "<<endl;
+cprintf("                *             CREATE YOUR COMPANY ");
+cout<<" "<<endl;
+cprintf("                *    1.COMPANY CODE(5 digit)" );
+cout<<" "<<endl;
+cprintf("                *      Ex:(12345.txt)       : " );
+char Comno[10];
+cin>>Comno;
+cprintf("                *    2.COMPANY NAME(20 digit): ");
+char Comnam[20];
+gets(Comnam);
+cprintf("                *    3.COMPANY TYPE(10 digit): ");
+char Comty[10];
+gets(Comty);
+cprintf("                *    4.ADDRESS(20 digit): " );
+char Add[20];
+gets(Add);
+cprintf("                *    5.OWNER'S NAME(15 digit): ");
+char Owner[20];
+gets(Owner);
+cprintf("                *    6.MOBILE NO.(11 digit): ");
+char mob[10];
+cin>>mob;
+cprintf("                *     Press X to create");
+cout<<" "<<endl;
+cprintf("                *     Press Y to reset");
+cout<<" " <<endl;
+cprintf("                *     Press Z to exit");
+cout<<" " <<endl;
+level4:
+cprintf("                *     Choice:- ");
+char choic;
+cin>>choic;
+{
+   if(choic=='x'||choic=='X')    {   clrscr();
+				     fstream company;
+				     company.open(Comno,ios::in);
+			       level5:if(!company.fail()){
+					 clrscr();
+					 cprintf("This name file already exist search it in second option");
+					 cout<<" "<<endl;
+					 cprintf("press x to exit");
+					 char choi;
+					 cin>>choi;
+					 if(choi=='x'||choi=='X'){goto choice5;}
+					 else goto level5;
+					 company.close();
+					 }
+				     else{
+					 company.open(Comno,ios::out);
+					 for(int i=0;i>10;i++){
+					 cout<<Comno[i];
+					   }
+					  cprintf("Your Company Created");
+					  delay(150);
+
+					  database(Comno[10]);
+
+					 }
+				  }
+   else if(choic=='y'||choic=='Y') {goto level1;}
+   else if(choic=='Z'||choic=='z') {goto choice5;}
+   else {cout<<"invalid entry"<<endl;
+	  goto level4;       }
+       } }
+
+else if(ch1==2){
+   lavel1:
+	   cout<<"\n \n \n \n \n \n \n \n \n \n \n"<<endl;
+	   textcolor(3);
+	   cprintf("                      Enter the 5 digit company code ");
+	   cout<<" "<<endl;
+	   cprintf("                          Ex-(12345.txt):-  ");
+	   char Comno[10];
+	   gets(Comno);
+	   fstream file;
+	   file.open(Comno,ios::in);
+	   if(!file.fail()){
+			  database(Comno[10]);
+			    }
+	   else { textcolor(5);
+		  cprintf("No Such File Found");
+		  cout<<" "<<endl;
+		  cprintf("Press x to retype file name");
+		  cout<<" "<<endl;
+		  cprintf("Press y to goto HOME SCREEN");
+		  cout<<" "<<endl;
+		  cprintf("Choice: ");
+		  char choicee1;
+		  cin>>choicee1;
+		  if(choicee1=='x'||choicee1=='X') {    clrscr();
+							goto lavel1;}
+		  else if(choicee1=='y'||choicee1=='Y') {goto choice5;}
+		    }
+			 }
+else{ choice6:
+    initgraph (&gd, &gm, "C:\\turboC3\\bgi");
+    settextstyle(GOTHIC_FONT,HORIZ_DIR,4);
+    setcolor(6);
+    outtextxy(50,1,"BUSINESS ONE");
+    settextstyle(2,HORIZ_DIR,10);
+    setcolor(4);
+    line(1,45,500,45);
+    outtextxy(50,60,"HELP SCREEN");
+    line(1,100,500,100);
+    bar3d(10,130,500,425,20,6);
+    settextstyle(3,HORIZ_DIR,1);
+    setcolor(BLACK);
+    outtextxy(15,160,"This program is an official software developed ");
+    outtextxy(15,200,"by PRADDY & Corp.Registered 2017.This program ");
+    outtextxy(15,240,"could be used for data management in company.");
+    outtextxy(15,280,"It gives a better way of managing data in company");
+    outtextxy(15,320,"and very easy to use.For any kind of querry or ");
+    outtextxy(15,360,"suggestions contact us at nationalverma3@gmail.com");
+    setcolor(8);
+    outtextxy(15,380,"PRESS B TO BACK");
+    cout<<"\n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n "<<endl;
+    cout<<" \t \t \t \t \t \t Choice:- ";
+    char ch2=0;
+    cin>>ch2;
+    if(ch2=='b'||ch2=='B')
+     {goto choice5;}
+    else {goto choice6;}
+    getch();
+    closegraph();
+      }
+getch();
+}
+
+
+
+//database function
+void database(char a)
+{
+int tradebook(int);
+
+ start:
+ clrscr();
+ int gd=DETECT,gm;
+ initgraph (&gd,&gm, "C:\\turboC3\\bgi");
+settextstyle(GOTHIC_FONT,HORIZ_DIR,4);
+int x,y,i;
+	x=getmaxx()/2;
+	y=getmaxy()/2;
+	for(i=30;i<200;i++)
+	{
+		delay(20);
+		setcolor(i/6);
+		arc(x,y,0,360,i-10);
+	}
+	closegraph();
+level10 :
+clrscr();
+int ad=DETECT,am;
+ initgraph (&ad,&am, "C:\\turboC3\\bgi");
+settextstyle(GOTHIC_FONT,HORIZ_DIR,4);
+setcolor(7);
+outtextxy(50,1,"BUSINESS ONE");
+settextstyle(2,HORIZ_DIR,10);
+setcolor(3);
+line(1,45,500,45);
+outtextxy(50,60,"WELCOME");
+cprintf("hello");
+line(1,100,500,100);
+bar3d(10,200,500,425,20,1);
+settextstyle(7,HORIZ_DIR,3);
+setcolor(BLACK);
+
+level7 :
+outtextxy(15,220,"1.  INVENTORY");
+outtextxy(15,270,"2.  TRADE BOOK");
+outtextxy(15,320,"3.  HELP");
+outtextxy(15,370,"4.  PHONE BOOK");
+outtextxy(230,220,"5.  GAMES");
+outtextxy(230,270,"6.  LOG OUT");
+textcolor(1);
+cout<<"\n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n "<<endl;
+cout<<" \t  \t \t \t \t \t Choice:- ";
+char choice3;
+cin>>choice3;
+getch();
+closegraph();
+int ch1=0,ch2=choice3-48;
+switch(ch2)
+{
+  case 1:  {
+	      textcolor(-5);
+	      cprintf("                                     Inventory");
+	      textcolor(6);
+	      cout<<" "<<endl;
+	      cprintf("ADD A/a and write your file name");
+	      cout<<" "<<endl;
+	      cprintf("(Ex A12345.txt):- ")     ;
+	      char choicq[10];
+	      char name[30],no[10],ch;
+	      gets(choicq);
+	      ans :
+	      clrscr();
+	      ifstream fin(choicq,ios::in);
+	      fin.seekg(0);
+	      cout<<"\n";
+	      while(fin)
+	      {
+		fin.get(no,10);
+		fin.get(ch);
+		fin.get(name,30);
+		fin.get(ch);
+		cout<<"CUSTOMER NO:- "<<no;
+		cout<<"\t \t \t NAME : "<<name<<"\n ";
+		cout<<"------------------------------------------------------"<<endl;
+
+		  }
+
+		  fin.close();
+	      textcolor(9);
+	      cprintf("INPUT :- 1 TO ADD");
+	      cout<<" "<<endl;
+	      cprintf("      :- 2 TO EDIT");
+	      cout<<" "<<endl;
+	      cprintf("      :- 3 TO EXIT");
+	      cout<<" "<<endl;
+	      choicr:
+	      cprintf("CHOICE:- ");
+	      int choicw;
+	      cin>>choicw;
+	      if(choicw==1){ clrscr();
+				  ofstream fout;
+				  fout.open(choicq,ios::app);
+				  char ans='y',No[10],Name[30];
+				  while(ans=='y'||ans=='Y')
+				  {
+				    cout<<"ENTER THE CUSTOMER NO:- ";
+				    gets(No);
+				    cout<<"\nENTER THE CUSTOMER NAME:- ";
+				    gets(Name);
+				    fout<<No<<'\n'<<Name<<'\n';
+				    cout<<"-----------------------------------------"<<endl;
+				    cout<<"WANT TO INPUT MORE?(y/n)";
+				    cin>>ans;
+				    if(ans=='n'||ans=='N')
+				    goto ans;
+				    cout<<" "<<endl;
+				     }
+				     }
+	      else if(choicw==3){  cout<<"Enter the customer id and name to be deleted"<<endl;
+				   char cno[10],cnam[20];
+				   cout<<"Customer No. :- ";
+				   gets(cno);
+				   cout<<"Customer name :- ";
+				   gets(cnam);
+				   fstream fin;
+				   fin.open(choicq,ios::in);
+				   fstream fout;
+				   fout.open("cg.txt",ios::out |ios::in);
+				   char serche[30];
+				   while(fin)
+				   { fin>>serche;
+				     if(strcmp(cno,serche)==0 || strcmp(cnam,serche)==0)
+					clrscr();
+
+				     else
+				       fout<<serche<<'\n';
+				   }
+				      fin.close();
+				      fout.close();
+				      remove(choicq);
+				      rename("cg.txt",choicq);
+				      goto ans;
+				       }
+	      else if(choicw==3){
+				    goto start;
+				       }
+	      else  goto choicr;
+
+	   break;}
+  case 2:  {  lqvl1:
+	      clrscr();
+  initgraph (&gd, &gm, "C:\\turboC3\\bgi");
+settextstyle(GOTHIC_FONT,HORIZ_DIR,4);
+setcolor(YELLOW);
+outtextxy(50,1,"BUSINESS ONE");
+settextstyle(2,HORIZ_DIR,10);
+setcolor(GREEN);
+line(1,45,500,45);
+outtextxy(50,60,"HOME SCREEN");
+line(1,100,500,100);
+bar3d(10,200,500,425,20,1);
+settextstyle(7,HORIZ_DIR,3);
+setcolor(BLACK);
+outtextxy(15,220,"1.  IMPORT");
+outtextxy(15,270,"2.  EXPORT");
+outtextxy(15,320,"3.  WISHLIST");
+outtextxy(15,370,"4.  BACK");
+textcolor(1);
+cout<<"\n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n "<<endl;
+cout<<" \t  \t \t \t \t \t Choice:- ";
+int choice12=0;
+cin>>choice12;
+getch();
+closegraph();
+int ch13=choice12;
+switch(ch13)
+{
+  case 1:  {  clrscr();
+	      textcolor(-5);
+	      cprintf("                                     IMPORTS");
+	      textcolor(6);
+	      cout<<" "<<endl;
+	      cprintf("ADD I/i and write your file name");
+	      cout<<" "<<endl;
+	      cprintf("(Ex I12345.txt):- ")     ;
+	      char choicq[10];
+	      char name[30],no[10],ch;
+	      gets(choicq);
+	      anr :
+	      clrscr();
+	      ifstream fin(choicq,ios::in);
+	      fin.seekg(0);
+	      cout<<"\n";
+	      while(fin)
+	      {
+		fin.get(no,10);
+		fin.get(ch);
+		fin.get(name,30);
+		fin.get(ch);
+		cout<<"ITEM NAME:- "<<no;
+		cout<<"\t \t \t QUANTITY : "<<name<<"\n ";
+		cout<<"------------------------------------------------------"<<endl;
+
+		  }fin.close();
+	      textcolor(9);
+	      cprintf("INPUT :- 1 TO ADD");
+	      cout<<" "<<endl;
+	      cprintf("      :- 2 TO EDIT");
+	      cout<<" "<<endl;
+	      cprintf("      :- 3 TO EXIT");
+	      cout<<" "<<endl;
+	      choicz:
+	      cprintf("CHOICE:- ");
+	      int choicw;
+	      cin>>choicw;
+
+	       if(choicw==1){ clrscr();
+				  ofstream fout;
+				  fout.open(choicq,ios::app);
+				  char ans='y',No[10],Name[30];
+				  while(ans=='y'||ans=='Y')
+				  {
+				    cout<<"ENTER THE ITEM NAME:- ";
+				    gets(No);
+				    cout<<"\nENTER THE QUANTITY:- ";
+				    gets(Name);
+				    fout<<No<<'\n'<<Name<<'\n';
+				    cout<<"-----------------------------------------"<<endl;
+				    cout<<"WANT TO INPUT MORE?(y/n)";
+				    cin>>ans;
+				    if(ans=='n'||ans=='N')
+				    goto anr;
+				    cout<<" "<<endl;
+				     }
+				     }
+	      else if(choicw==2){  cout<<"Enter the item name and quantity to be deleted"<<endl;
+				   char cna[20],cnom[20];
+				   cout<<"Item Name :- ";
+				   gets(cna);
+				   cout<<"Item Qty :- ";
+				   gets(cnom);
+				   fstream fin;
+				   fin.open(choicq,ios::in);
+				   fstream fout;
+				   fout.open("cg.txt",ios::out |ios::in);
+				   char serchk[30];
+				   while(fin)
+				   { fin>>serchk;
+				     if(strcmp(cna,serchk)==0 || strcmp(cnom,serchk)==0)
+					clrscr();
+
+				     else
+				       fout<<serchk<<'\n';
+				   }
+				      fin.close();
+				      fout.close();
+				      remove(choicq);
+				      rename("cg.txt",choicq);
+				      goto anr;
+
+				       }
+	      else if(choicw==3){
+
+				   fin.close();
+				   goto lqvl1;    }
+	      else  goto choicz;
+
+
+
+
+	   break;}
+
+  case 2:  {  clrscr();
+	      textcolor(-5);
+	      cprintf("                                     EXPORTS");
+	      textcolor(6);
+	      cout<<" "<<endl;
+	      cprintf("ADD E/e and write your file name");
+	      cout<<" "<<endl;
+	      cprintf("(Ex E12345.txt):- ")     ;
+	      char choicq[10];
+	      char name[30],no[10],ch;
+	      gets(choicq);
+	      ans1 :
+	      clrscr();
+	      ifstream fin(choicq,ios::in);
+	      fin.seekg(0);
+	      cout<<"\n";
+	      while(fin)
+	      {
+		fin.get(no,10);
+		fin.get(ch);
+		fin.get(name,30);
+		fin.get(ch);
+		cout<<"ITEM NAME:- "<<no;
+		cout<<"\t \t \t QUANTITY : "<<name<<"\n ";
+		cout<<"------------------------------------------------------"<<endl;
+
+		  }fin.close();
+	      textcolor(9);
+	      cprintf("INPUT :- 1 TO ADD");
+	      cout<<" "<<endl;
+	      cprintf("      :- 2 TO EDIT");
+	      cout<<" "<<endl;
+	      cprintf("      :- 3 TO EXIT");
+	      cout<<" "<<endl;
+	      choicr1:
+	      cprintf("CHOICE:- ");
+	      int choicw;
+	      cin>>choicw;
+
+	      if(choicw==1){ clrscr();
+				  ofstream fout;
+				  fout.open(choicq,ios::app);
+				  char ans='y',No[10],Name[30];
+				  while(ans=='y'||ans=='Y')
+				  {
+				    cout<<"ENTER THE ITEM NAME:- ";
+				    gets(No);
+				    cout<<"\nENTER THE QUANTITY:- ";
+				    gets(Name);
+				    fout<<No<<'\n'<<Name<<'\n';
+				    cout<<"-----------------------------------------"<<endl;
+				    cout<<"WANT TO INPUT MORE?(y/n)";
+				    cin>>ans;
+				    if(ans=='n'||ans=='N')
+				    goto ans1;
+				    cout<<" "<<endl;
+				     }
+				     }
+	      else if(choicw==2){
+					cout<<"Enter the item name and quantity to be deleted"<<endl;
+				   char cna[20],cnom[20];
+				   cout<<"Item Name :- ";
+				   gets(cna);
+				   cout<<"Item Qty :- ";
+				   gets(cnom);
+				   fstream fin;
+				   fin.open(choicq,ios::in);
+				   fstream fout;
+				   fout.open("cg.txt",ios::out |ios::in);
+				   char serchk[30];
+				   while(fin)
+				   { fin>>serchk;
+				     if(strcmp(cna,serchk)==0 || strcmp(cnom,serchk)==0)
+					clrscr();
+
+				     else
+				       fout<<serchk<<'\n';
+				   }
+				      fin.close();
+				      fout.close();
+				      remove(choicq);
+				      rename("cg.txt",choicq);
+				      goto anr;
+
+				       }
+	      else if(choicw==3){
+				   fin.close();
+				   goto lqvl1;
+				       }
+	      else  goto choicr1;
+
+
+
+
+	   break;}
+  case 3: {   clrscr();
+	      textcolor(-5);
+	      cprintf("                                     WISHLIST");
+	      textcolor(6);
+	      cout<<" "<<endl;
+	      cprintf("ADD W/w and write your file name");
+	      cout<<" "<<endl;
+	      cprintf("(Ex W12345.txt):- ")     ;
+	      char choicq[10];
+	      char name[30],no[10],ch;
+	      gets(choicq);
+	      ans2 :
+	      clrscr();
+	      ifstream fin(choicq,ios::in);
+	      fin.seekg(0);
+	      cout<<"\n";
+	      while(fin)
+	      {
+		fin.get(no,10);
+		fin.get(ch);
+		fin.get(name,30);
+		fin.get(ch);
+		cout<<"ITEM NAME:- "<<no;
+		cout<<"\t \t \t QUANTITY : "<<name<<"\n ";
+		cout<<"------------------------------------------------------"<<endl;
+
+		  }fin.close();
+	      textcolor(9);
+	      cprintf("INPUT :- 1 TO ADD");
+	      cout<<" "<<endl;
+	      cprintf("      :- 2 TO EDIT");
+	      cout<<" "<<endl;
+	      cprintf("      :- 3 TO EXIT");
+	      cout<<" "<<endl;
+	      choicr2:
+	      cprintf("CHOICE:- ");
+	      int choicw;
+	      cin>>choicw;
+
+	       if(choicw==1){ clrscr();
+				  ofstream fout;
+				  fout.open(choicq,ios::app);
+				  char ans='y',No[10],Name[30];
+				  while(ans=='y'||ans=='Y')
+				  {
+				    cout<<"ENTER THE ITEM NAME:- ";
+				    gets(No);
+				    cout<<"\nENTER THE QUANTITY:- ";
+				    gets(Name);
+				    fout<<No<<'\n'<<Name<<'\n';
+				    cout<<"-----------------------------------------"<<endl;
+				    cout<<"WANT TO INPUT MORE?(y/n)";
+				    cin>>ans;
+				    if(ans=='n'||ans=='N')
+				    goto ans2;
+				    cout<<" "<<endl;
+				     }
+				     }
+	      else if(choicw==2){
+				   cout<<"Enter the item name and quantity to be deleted"<<endl;
+				   char cna[20],cnom[20];
+				   cout<<"Item Name :- ";
+				   gets(cna);
+				   cout<<"Item Qty :- ";
+				   gets(cnom);
+				   fstream fin;
+				   fin.open(choicq,ios::in);
+				   fstream fout;
+				   fout.open("cg.txt",ios::out |ios::in);
+				   char serchk[30];
+				   while(fin)
+				   { fin>>serchk;
+				     if(strcmp(cna,serchk)==0 || strcmp(cnom,serchk)==0)
+					clrscr();
+
+				     else
+				       fout<<serchk<<'\n';
+				   }
+				      fin.close();
+				      fout.close();
+				      remove(choicq);
+				      rename("cg.txt",choicq);
+				      goto anr;
+
+				       }
+	      else if(choicw==3){
+
+				   fin.close();
+				   goto lqvl1;
+				       }
+	      else  goto choicr2;
+
+	   break;}
+      case 4:{ goto  start;
+		      break;  }
+ }
+if(ch13!=1 && ch13!=2 && ch13!=3 &&ch13!=4 ) {goto lqvl1;
+	    }
+	   break;}
+
+  case 3: {  choice9:
+    initgraph (&gd, &gm, "C:\\turboC3\\bgi");
+    settextstyle(GOTHIC_FONT,HORIZ_DIR,4);
+    setcolor(6);
+    outtextxy(50,1,"BUSINESS ONE");
+    settextstyle(2,HORIZ_DIR,10);
+    setcolor(4);
+    line(1,45,500,45);
+    outtextxy(50,60,"HELP SCREEN");
+    line(1,100,500,100);
+    bar3d(10,130,500,425,20,6);
+    settextstyle(3,HORIZ_DIR,1);
+    setcolor(BLACK);
+    outtextxy(15,160,"This program is an official software developed ");
+    outtextxy(15,200,"by ECPSSS Corp.Registered 2017.This program ");
+    outtextxy(15,240,"could be used for data management in company.");
+    outtextxy(15,280,"It gives a better way of managing data in company");
+    outtextxy(15,320,"and very easy to use.For any kind of querry or ");
+    outtextxy(15,360,"suggestions contact us at ecpsss18@email.com");
+    setcolor(8);
+    outtextxy(15,380,"PRESS B TO BACK");
+    cout<<"\n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n "<<endl;
+    cout<<" \t \t \t \t \t \t Choice1:- ";
+    char ch2=0;
+    cin>>ch2;
+    if(ch2=='b'||ch2=='B')
+     {goto level10;}
+    else {goto choice9;}
+    getch();
+    closegraph();
+
+	   break;}
+  case 4: {
+	       textcolor(-5);
+	      cprintf("                                     PHONEBOOK");
+	      textcolor(6);
+	      cout<<" "<<endl;
+	      cprintf("ADD P/p and write your file name");
+	      cout<<" "<<endl;
+	      cprintf("(Ex P12345.txt):- ")     ;
+	      char choicq[10];
+	      char name[30],no[10],ch;
+	      gets(choicq);
+	      ansr :
+	      clrscr();
+	      ifstream fin(choicq,ios::in);
+	      fin.seekg(0);
+	      cout<<"\n";
+	      while(fin)
+	      {
+		fin.get(no,10);
+		fin.get(ch);
+		fin.get(name,30);
+		fin.get(ch);
+		cout<<"CUSTOMER NAME:- "<<no;
+		cout<<"\t \t \t MOB NO : "<<name<<"\n ";
+		cout<<"------------------------------------------------------"<<endl;
+
+		  }fin.close();
+	      textcolor(9);
+	      cprintf("INPUT :- 1 TO ADD");
+	      cout<<" "<<endl;
+	      cprintf("      :- 2 TO EDIT");
+	      cout<<" "<<endl;
+	      cprintf("      :- 3 TO EXIT");
+	      cout<<" "<<endl;
+	      choict:
+	      cprintf("CHOICE:- ");
+	      int choicw;
+	      cin>>choicw;
+
+	      if(choicw==1){ clrscr();
+				  ofstream fout;
+				  fout.open(choicq,ios::app);
+				  char ans='y',No[10],Name[30];
+				  while(ans=='y'||ans=='Y')
+				  {
+				    cout<<"ENTER THE CUSTOMER NAME:- ";
+				    gets(No);
+				    cout<<"\nENTER THE CUSTOMER MOBILE NO :- ";
+				    gets(Name);
+				    fout<<No<<'\n'<<Name<<'\n';
+				    cout<<"-----------------------------------------"<<endl;
+				    cout<<"WANT TO INPUT MORE?(y/n)";
+				    cin>>ans;
+				    if(ans=='n'||ans=='N')
+				    goto ansr;
+				    cout<<" "<<endl;
+				     }
+				     }
+		    else if(choicw==2){
+
+				   cout<<"Enter the customer id and name to be deleted"<<endl;
+				   char cna[10],cnom[20];
+				   cout<<"Customer No. :- ";
+				   gets(cna);
+				   cout<<"Customer name :- ";
+				   gets(cnom);
+				   fstream fin;
+				   fin.open(choicq,ios::in);
+				   fstream fout;
+				   fout.open("cg.txt",ios::out |ios::in);
+				   char serchk[30];
+				   while(fin)
+				   { fin>>serchk;
+				     if(strcmp(cna,serchk)==0 || strcmp(cnom,serchk)==0)
+					clrscr();
+
+				     else
+				       fout<<serchk<<'\n';
+				   }
+				      fin.close();
+				      fout.close();
+				      remove(choicq);
+				      rename("cg.txt",choicq);
+				      goto ans;
+				       }
+
+
+	      else if(choicw==3){
+				    goto start;
+				       }
+	      else  goto choict;
+
+	   break;}
+   case 5: {  Snake snk;
+	      int gd=DETECT,gm,i,j,k,x,y;
+	      clrscr();
+	      initgraph(&gd, &gm, "C:\\turboC3\\bgi");
+	      snk.init();
+	      snk.move();
+
+	      closegraph();
+	      restorecrtmode();
+	       break;}
+
+  case 6:  {exit(4);}
+  default: { goto level7;
+	    break;}
+
+ }
+}
